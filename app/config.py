@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     name: str = Field(env='PROJECT_NAME')
     db_client_id: str = Field(env='ASTRA_DB_CLIENT_ID')
     db_client_secret: str = Field(env='ASTRA_DB_CLIENT_SECRET')
+    redis_url: str = Field(env='REDIS_URL')
 
     class Config:
         env_file = '.env'
