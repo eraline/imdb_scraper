@@ -7,12 +7,15 @@ from cassandra.auth import PlainTextAuthProvider
 from cassandra.cqlengine.connection import (register_connection,
     set_default_connection)
 
-load_dotenv()
+from .config import get_settings
+
+
+settings = get_settings() 
 
 BASE_DIR = pathlib.Path(__file__).parent
 CLUSTER_BUNDLE = os.path.join(BASE_DIR, 'ignored/connect.zip')
-ASTRA_DB_CLIENT_ID = os.getenv('ASTRA_DB_CLIENT_ID')
-ASTRA_DB_CLIENT_SECRET = os.getenv('ASTRA_DB_CLIENT_SECRET')
+ASTRA_DB_CLIENT_ID = settings.db_client_id
+ASTRA_DB_CLIENT_SECRET = settings.db_client_secret
 
 
 def get_cluster():    
