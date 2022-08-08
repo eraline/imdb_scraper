@@ -28,7 +28,14 @@ beat_init.connect(celery_on_startup )
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, *args, **kwargs):
-    sender.add_periodic_task(1, random_task.s('Hello!'), expires=10)
+    # sender.add_periodic_task(
+    #     1, 
+    #     random_task.s('Hello!'), expires=10)
+    
+    sender.add_periodic_task(
+        crontab(minute=5),
+        scrape_films.s()
+    )
 
 @celery_app.task
 def random_task(name):
@@ -38,3 +45,14 @@ def random_task(name):
 def list_films():
     q = Film.objects.all().values_list('imdb_id', flat=True)
     print(list(q))
+
+@celery_app.task
+def scrape_imdb_id(imdb_id):
+    print(imdb_id)
+
+@celery_app.task
+def scrape_films():
+    print('Scraping minutes')
+    q = Film.objects.all().values_list('imdb_id', flat=True)
+    for imdb_id in q:
+        scrape_imdb_id.delay(imdb_id)
