@@ -1,9 +1,10 @@
+from attr import validate
 from cassandra.cqlengine import connection
 from cassandra.cqlengine.management import sync_table
 from celery.schedules import crontab
 from celery import Celery
 from celery.signals import beat_init, worker_process_init
-from . import config, db
+from . import config, db, scraper, schema, crud
 from .models import Film, FilmScrapeEvent
 
 
@@ -48,7 +49,10 @@ def list_films():
 
 @celery_app.task
 def scrape_imdb_id(imdb_id):
-    print(imdb_id)
+    s = scraper.Scraper(imdb_id=imdb_id, endless_scroll=True)
+    dataset = s.scrape()
+    validated_data = schema.FilmSchema(**dataset)
+    crud.add_scrape_event(validated_data.dict())
 
 @celery_app.task
 def scrape_films():
