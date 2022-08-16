@@ -34,7 +34,7 @@ def setup_periodic_tasks(sender, *args, **kwargs):
     #     random_task.s('Hello!'), expires=10)
     
     sender.add_periodic_task(
-        crontab(minute=5),
+        crontab(minute='*/5'),
         scrape_films.s()
     )
 
@@ -50,9 +50,17 @@ def list_films():
 @celery_app.task
 def scrape_imdb_id(imdb_id):
     s = scraper.Scraper(imdb_id=imdb_id, endless_scroll=True)
-    dataset = s.scrape()
-    validated_data = schema.FilmSchema(**dataset)
-    crud.add_scrape_event(validated_data.dict())
+    try:
+        dataset = s.scrape()
+        validated_data = schema.FilmSchema(**dataset)
+    except:
+        validated_data = None
+
+    if validated_data is not None:
+        film, _ = crud.add_scrape_event(validated_data.dict())
+        return imdb_id, True
+    return imdb_id, False
+
 
 @celery_app.task
 def scrape_films():

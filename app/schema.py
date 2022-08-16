@@ -27,5 +27,5 @@ class FilmScrapeEventDetailSchema(BaseModel):
     
     @root_validator(pre=True)
     def extra_create_time_from_uuid(cls, values):
-        values['created'] = utils.uuid1_time_to_datetime(values['uuid'].time).timestamp()
+        values['created'] = utils.uuid1_time_to_datetime(values['uuid'].time)
         return values 
